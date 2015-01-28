@@ -22,7 +22,7 @@
  */
 
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, regexp: true, continue:true */
-/*global define, $, _, window, app, type, document, csharp, parser */
+/*global define, $, _, window, app, type, document, Typescript, parser */
 define(function (require, exports, module) {
     "use strict";
 
@@ -36,37 +36,26 @@ define(function (require, exports, module) {
         FileUtils       = app.getModule("file/FileUtils"),
         Async           = app.getModule("utils/Async");
 
-    require("grammar/csharp");
+    require("grammar/Typescript");
 
-    // C# Primitive Types
-    var csharpPrimitiveTypes = [
-        "sbyte",
-        "byte",
-        "short",
-        "ushort",
-        "int",
-        "uint",
-        "long",
-        "ulong",
-        "char",
-        "float",
-        "double",
-        "decimal",
-        "bool",
-        "object",
+    // Typescript Primitive Types
+    var typescriptPrimitiveTypes = [
+        "number",
         "string",
+        "boolean",
+        "Object",
         "void"
     ];
 
     /**
-     * C# Code Analyzer
+     * Typescript Code Analyzer
      * @constructor
      */
-    function CsharpCodeAnalyzer() {
+    function TypescriptCodeAnalyzer() {
 
         /** @member {type.UMLModel} */
         this._root = new type.UMLModel();
-        this._root.name = "CsharpReverse";
+        this._root.name = "TypescriptReverse";
 
         /** @member {Array.<File>} */
         this._files = [];
@@ -106,7 +95,7 @@ define(function (require, exports, module) {
      * Add File to Reverse Engineer
      * @param {File} file
      */
-    CsharpCodeAnalyzer.prototype.addFile = function (file) {
+    TypescriptCodeAnalyzer.prototype.addFile = function (file) {
         this._files.push(file);
     };
 
@@ -115,7 +104,7 @@ define(function (require, exports, module) {
      * @param {Object} options
      * @return {$.Promise}
      */
-    CsharpCodeAnalyzer.prototype.analyze = function (options) {
+    TypescriptCodeAnalyzer.prototype.analyze = function (options) {
         var self = this,
             promise;
 
@@ -139,7 +128,7 @@ define(function (require, exports, module) {
         // Generate Diagrams
         promise.always(function () {
             self.generateDiagrams(options);
-            console.log("[C#] done.");
+            console.log("[Typescript] done.");
         });
 
         return promise;
@@ -149,7 +138,7 @@ define(function (require, exports, module) {
      * Generate Diagrams (Type Hierarchy, Package Structure, Package Overview)
      * @param {Object} options
      */
-    CsharpCodeAnalyzer.prototype.generateDiagrams = function (options) {
+    TypescriptCodeAnalyzer.prototype.generateDiagrams = function (options) {
         var baseModel = Repository.get(this._root._id);
         if (options.packageStructure) {
             CommandManager.execute("diagramGenerator.packageStructure", baseModel, true);
@@ -172,7 +161,7 @@ define(function (require, exports, module) {
      * @return {Array.<string>} pathName
      */
 
-    CsharpCodeAnalyzer.prototype._toPathName = function (typeName) {
+    TypescriptCodeAnalyzer.prototype._toPathName = function (typeName) {
 
         var type_ = typeName;
 
@@ -196,7 +185,7 @@ define(function (require, exports, module) {
      * @return {type.Model} element correspond to the type.
      */
 
-    CsharpCodeAnalyzer.prototype._findType = function (namespace, type_, compilationUnitNode) {
+    TypescriptCodeAnalyzer.prototype._findType = function (namespace, type_, compilationUnitNode) {
         var typeName,
             pathName,
             _type = null;
@@ -262,7 +251,7 @@ define(function (require, exports, module) {
      * @param {Array.<string>} pathNames
      * @return {type.Model} Class element corresponding to the pathNames
      */
-    CsharpCodeAnalyzer.prototype._ensureClass = function (namespace, pathNames) {
+    TypescriptCodeAnalyzer.prototype._ensureClass = function (namespace, pathNames) {
         if (pathNames.length > 0) {
             var _className = pathNames.pop(),
                 _package = this._ensurePackage(namespace, pathNames),
@@ -287,7 +276,7 @@ define(function (require, exports, module) {
      * @param {Array.<string>} pathNames
      * @return {type.Model} Interface element corresponding to the pathNames
      */
-    CsharpCodeAnalyzer.prototype._ensureInterface = function (namespace, pathNames) {
+    TypescriptCodeAnalyzer.prototype._ensureInterface = function (namespace, pathNames) {
         if (pathNames.length > 0) {
             var _interfaceName = pathNames.pop(),
                 _package = this._ensurePackage(namespace, pathNames),
@@ -313,7 +302,7 @@ define(function (require, exports, module) {
 
     // _itemTypeName = this._isGenericCollection(_asso.node.type, _asso.node.compilationUnitNode);
 
-    CsharpCodeAnalyzer.prototype._isGenericCollection = function (typeNode, compilationUnitNode) {
+    TypescriptCodeAnalyzer.prototype._isGenericCollection = function (typeNode, compilationUnitNode) {
 //        if (typeNode.qualifiedName.typeParameters && typeNode.qualifiedName.typeParameters.length > 0) {
 //            var _collectionType = typeNode.qualifiedName.name,
 //                _itemType       = typeNode.qualifiedName.typeParameters[0].name;
@@ -356,7 +345,7 @@ define(function (require, exports, module) {
      *
      * @param {Object} options
      */
-    CsharpCodeAnalyzer.prototype.performSecondPhase = function (options) {
+    TypescriptCodeAnalyzer.prototype.performSecondPhase = function (options) {
         var i, len, j, len2, _typeName, _type, _itemTypeName, _itemType, _pathName;
 
 
@@ -513,7 +502,7 @@ define(function (require, exports, module) {
                 }
 
                 // if type is primitive type
-                if (_.contains(csharpPrimitiveTypes, _typeName)) {
+                if (_.contains(TypescriptPrimitiveTypes, _typeName)) {
                     _typedFeature.feature.type = _typeName;
                 // otherwise
                 } else {
@@ -545,14 +534,14 @@ define(function (require, exports, module) {
      * @param {Object} options
      * @return {$.Promise}
      */
-    CsharpCodeAnalyzer.prototype.performFirstPhase = function (options) {
+    TypescriptCodeAnalyzer.prototype.performFirstPhase = function (options) {
         var self = this;
         return Async.doSequentially(this._files, function (file) {
             var result = new $.Deferred();
             file.read({}, function (err, data, stat) {
                 if (!err) {
                     try {
-                        var ast = csharp.parse(data);
+                        var ast = Typescript.parse(data);
 
                         var results = [];
                         for (var property in ast) {
@@ -569,7 +558,7 @@ define(function (require, exports, module) {
 
                         result.resolve();
                     } catch (ex) {
-                        console.error("[C#] Failed to parse - " + file._name + "  : " + ex);
+                        console.error("[Typescript] Failed to parse - " + file._name + "  : " + ex);
                         result.reject(ex);
                     }
                 } else {
@@ -582,12 +571,12 @@ define(function (require, exports, module) {
 
 
     /**
-     * Translate C# CompilationUnit Node.
+     * Translate Typescript CompilationUnit Node.
      * @param {Object} options
      * @param {type.Model} namespace
      * @param {Object} compilationUnitNode
      */
-    CsharpCodeAnalyzer.prototype.translateCompilationUnit = function (options, namespace, compilationUnitNode)
+    TypescriptCodeAnalyzer.prototype.translateCompilationUnit = function (options, namespace, compilationUnitNode)
     {
         var _namespace = namespace,
             i,
@@ -603,7 +592,7 @@ define(function (require, exports, module) {
      * @param {type.Model} namespace
      * @param {Array.<Object>} typeNodeArray
      */
-    CsharpCodeAnalyzer.prototype.translateTypes = function (options, namespace, typeNodeArray) {
+    TypescriptCodeAnalyzer.prototype.translateTypes = function (options, namespace, typeNodeArray) {
         var _namespace = namespace, i, len;
         if (typeNodeArray.length > 0) {
             for (i = 0, len = typeNodeArray.length; i < len; i++) {
@@ -639,12 +628,12 @@ define(function (require, exports, module) {
 
 
     /**
-     * Translate C# AnnotationType Node.
+     * Translate Typescript AnnotationType Node.
      * @param {Object} options
      * @param {type.Model} namespace
      * @param {Object} annotationTypeNode
      */
-    CsharpCodeAnalyzer.prototype.translateAnnotationType = function (options, namespace, annotationTypeNode) {
+    TypescriptCodeAnalyzer.prototype.translateAnnotationType = function (options, namespace, annotationTypeNode) {
         var _annotationType;
 
         // Create Class <<annotationType>>
@@ -654,7 +643,7 @@ define(function (require, exports, module) {
         _annotationType.stereotype = "annotationType";
         _annotationType.visibility = this._getVisibility(annotationTypeNode.modifiers);
 
-        // CsharpDoc
+        // TypescriptDoc
 //        if (annotationTypeNode.comment) {
 //            _annotationType.documentation = annotationTypeNode.comment;
 //        }
@@ -674,12 +663,12 @@ define(function (require, exports, module) {
 
 
     /**
-     * Translate C# Enum Node.
+     * Translate Typescript Enum Node.
      * @param {Object} options
      * @param {type.Model} namespace
      * @param {Object} enumNode
      */
-    CsharpCodeAnalyzer.prototype.translateEnum = function (options, namespace, enumNode) {
+    TypescriptCodeAnalyzer.prototype.translateEnum = function (options, namespace, enumNode) {
         var _enum;
 
         // Create Enumeration
@@ -688,7 +677,7 @@ define(function (require, exports, module) {
         _enum.name = enumNode.name;
         _enum.visibility = this._getVisibility(enumNode.modifiers);
 
-        // CsharpDoc
+        // TypescriptDoc
 //        if (enumNode.comment) {
 //            _enum.documentation = enumNode.comment;
 //        }
@@ -710,12 +699,12 @@ define(function (require, exports, module) {
 
 
      /**
-     * Translate C# Interface Node.
+     * Translate Typescript Interface Node.
      * @param {Object} options
      * @param {type.Model} namespace
      * @param {Object} interfaceNode
      */
-    CsharpCodeAnalyzer.prototype.translateInterface = function (options, namespace, interfaceNode) {
+    TypescriptCodeAnalyzer.prototype.translateInterface = function (options, namespace, interfaceNode) {
         var i, len, _interface;
 
         // Create Interface
@@ -724,7 +713,7 @@ define(function (require, exports, module) {
         _interface.name = interfaceNode.name;
         _interface.visibility = this._getVisibility(interfaceNode.modifiers);
 
-        // CsharpDoc
+        // TypescriptDoc
 //        if (interfaceNode.comment) {
 //            _interface.documentation = interfaceNode.comment;
 //        }
@@ -764,7 +753,7 @@ define(function (require, exports, module) {
      * @param {Array.<string>} modifiers
      * @return {string} Visibility constants for UML Elements
      */
-    CsharpCodeAnalyzer.prototype._getVisibility = function (modifiers) {
+    TypescriptCodeAnalyzer.prototype._getVisibility = function (modifiers) {
         if (_.contains(modifiers, "public")) {
             return UML.VK_PUBLIC;
         } else if (_.contains(modifiers, "protected")) {
@@ -777,12 +766,12 @@ define(function (require, exports, module) {
 
 
     /**
-     * Translate C# Class Node.
+     * Translate Typescript Class Node.
      * @param {Object} options
      * @param {type.Model} namespace
      * @param {Object} compilationUnitNode
      */
-    CsharpCodeAnalyzer.prototype.translateClass = function (options, namespace, classNode) {
+    TypescriptCodeAnalyzer.prototype.translateClass = function (options, namespace, classNode) {
         var i, len, _class;
 
         // Create Class
@@ -804,7 +793,7 @@ define(function (require, exports, module) {
             _class.isLeaf = true;
         }
 
-        // CsharpDoc
+        // TypescriptDoc
 //        if (classNode.comment) {
 //            _class.documentation = classNode.comment;
 //        }
@@ -853,7 +842,7 @@ define(function (require, exports, module) {
      * @param {type.Model} namespace
      * @param {Array.<Object>} memberNodeArray
      */
-    CsharpCodeAnalyzer.prototype.translateMembers = function (options, namespace, memberNodeArray) {
+    TypescriptCodeAnalyzer.prototype.translateMembers = function (options, namespace, memberNodeArray) {
         var i, len;
         if (memberNodeArray.length > 0) {
             for (i = 0, len = memberNodeArray.length; i < len; i++) {
@@ -897,12 +886,12 @@ define(function (require, exports, module) {
      * @param {type.Model} namespace
      * @param {Object} enumConstantNode
      */
-    CsharpCodeAnalyzer.prototype.translateEnumConstant = function (options, namespace, enumConstantNode) {
+    TypescriptCodeAnalyzer.prototype.translateEnumConstant = function (options, namespace, enumConstantNode) {
         var _literal = new type.UMLEnumerationLiteral();
         _literal._parent = namespace;
         _literal.name = enumConstantNode.name;
 
-        // CsharpDoc
+        // TypescriptDoc
 //        if (enumConstantNode.comment) {
 //            _literal.documentation = enumConstantNode.comment;
 //        }
@@ -918,7 +907,7 @@ define(function (require, exports, module) {
      * @param {Object} methodNode
      * @param {boolean} isConstructor
      */
-    CsharpCodeAnalyzer.prototype.translateMethod = function (options, namespace, methodNode, isConstructor)
+    TypescriptCodeAnalyzer.prototype.translateMethod = function (options, namespace, methodNode, isConstructor)
     {
         var i, len, _operation = new type.UMLOperation();
         _operation._parent = namespace;
@@ -993,7 +982,7 @@ define(function (require, exports, module) {
 //            }
 //        }
 
-        // CsharpDoc
+        // TypescriptDoc
 //        if (methodNode.comment) {
 //            _operation.documentation = methodNode.comment;
 //        }
@@ -1015,7 +1004,7 @@ define(function (require, exports, module) {
      * @param {string} name
      * @param {?} value Value of Tag
      */
-    CsharpCodeAnalyzer.prototype._addTag = function (elem, kind, name, value) {
+    TypescriptCodeAnalyzer.prototype._addTag = function (elem, kind, name, value) {
         var tag = new type.Tag();
         tag._parent = elem;
         tag.name = name;
@@ -1048,7 +1037,7 @@ define(function (require, exports, module) {
      * @param {Object} parameterNode
      */
 
-    CsharpCodeAnalyzer.prototype.translateParameter = function (options, namespace, parameterNode) {
+    TypescriptCodeAnalyzer.prototype.translateParameter = function (options, namespace, parameterNode) {
         var _parameter = new type.UMLParameter();
         _parameter._parent = namespace;
         _parameter.name = parameterNode.name;
@@ -1064,13 +1053,13 @@ define(function (require, exports, module) {
 
 
     /**
-     * Translate C# Field Node as UMLAssociation.
+     * Translate Typescript Field Node as UMLAssociation.
      * @param {Object} options
      * @param {type.Model} namespace
      * @param {Object} fieldNode
      */
 
-    CsharpCodeAnalyzer.prototype.translateFieldAsAssociation = function (options, namespace, fieldNode) {
+    TypescriptCodeAnalyzer.prototype.translateFieldAsAssociation = function (options, namespace, fieldNode) {
         var i, len;
         if (fieldNode.name && fieldNode.name.length > 0) {
             // Add to _associationPendings
@@ -1084,13 +1073,13 @@ define(function (require, exports, module) {
 
 
     /**
-     * Translate C# Field Node as UMLAttribute.
+     * Translate Typescript Field Node as UMLAttribute.
      * @param {Object} options
      * @param {type.Model} namespace
      * @param {Object} fieldNode
      */
 
-    CsharpCodeAnalyzer.prototype.translateFieldAsAttribute = function (options, namespace, fieldNode) {
+    TypescriptCodeAnalyzer.prototype.translateFieldAsAttribute = function (options, namespace, fieldNode) {
         var i, len;
         if (fieldNode.name && fieldNode.name.length > 0) {
             for (i = 0, len = fieldNode.name.length; i < len; i++) {
@@ -1123,7 +1112,7 @@ define(function (require, exports, module) {
                     this._addTag(_attribute, Core.TK_BOOLEAN, "volatile", true);
                 }
 
-                // CsharpDoc
+                // TypescriptDoc
 //                if (fieldNode.comment) {
 //                    _attribute.documentation = fieldNode.comment;
 //                }
@@ -1145,12 +1134,12 @@ define(function (require, exports, module) {
 
 
     /**
-     * Translate C# Type Parameter Nodes.
+     * Translate Typescript Type Parameter Nodes.
      * @param {Object} options
      * @param {type.Model} namespace
      * @param {Object} typeParameterNodeArray
      */
-    CsharpCodeAnalyzer.prototype.translateTypeParameters = function (options, namespace, typeParameterNodeArray) {
+    TypescriptCodeAnalyzer.prototype.translateTypeParameters = function (options, namespace, typeParameterNodeArray) {
         if (typeParameterNodeArray) {
             var i, len, _typeParam;
             for (i = 0, len = typeParameterNodeArray.length; i < len; i++) {
@@ -1169,12 +1158,12 @@ define(function (require, exports, module) {
     };
 
     /**
-     * Translate C# Package Node.
+     * Translate Typescript Package Node.
      * @param {Object} options
      * @param {type.Model} namespace
      * @param {Object} compilationUnitNode
      */
-    CsharpCodeAnalyzer.prototype.translatePackage = function (options, namespace, packageNode) {
+    TypescriptCodeAnalyzer.prototype.translatePackage = function (options, namespace, packageNode) {
         if (packageNode && packageNode.qualifiedName ) {
 
             var pathNames = packageNode.qualifiedName.split(".");
@@ -1190,7 +1179,7 @@ define(function (require, exports, module) {
      * @param {Array.<string>} pathNames
      * @return {type.Model} Package element corresponding to the pathNames
      */
-    CsharpCodeAnalyzer.prototype._ensurePackage = function (namespace, pathNames) {
+    TypescriptCodeAnalyzer.prototype._ensurePackage = function (namespace, pathNames) {
         if (pathNames.length > 0) {
             var name = pathNames.shift();
             if (name && name.length > 0) {
@@ -1221,20 +1210,20 @@ define(function (require, exports, module) {
     };
 
     /**
-     * Analyze all C# files in basePath
+     * Analyze all Typescript files in basePath
      * @param {string} basePath
      * @param {Object} options
      * @return {$.Promise}
      */
     function analyze(basePath, options) {
         var result = new $.Deferred(),
-            csharpAnalyzer = new CsharpCodeAnalyzer();
+            TypescriptAnalyzer = new TypescriptCodeAnalyzer();
 
         function visitEntry(entry) {
             if (entry._isFile === true) {
                 var ext = FileUtils.getFileExtension(entry._path);
-                if (ext && ext.toLowerCase() === "cs") {
-                    csharpAnalyzer.addFile(entry);
+                if (ext && ext.toLowerCase() === "ts") {
+                    TypescriptAnalyzer.addFile(entry);
                 }
             }
             return true;
@@ -1244,7 +1233,7 @@ define(function (require, exports, module) {
         var dir = FileSystem.getDirectoryForPath(basePath);
         dir.visit(visitEntry, {}, function (err) {
             if (!err) {
-                csharpAnalyzer.analyze(options).then(result.resolve, result.reject);
+                TypescriptAnalyzer.analyze(options).then(result.resolve, result.reject);
             } else {
                 result.reject(err);
             }
