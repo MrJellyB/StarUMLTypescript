@@ -24,7 +24,7 @@ Belows are the rules to convert from UML model elements to Java source codes.
 * `isFinalSpecialization` and `isLeaf` property to `sealed` modifier.
 * Default constructor is generated.
 * All contained types (_UMLClass_, _UMLInterface_, _UMLEnumeration_) are generated as inner type definition.
-* Documentation property to TypescriptDoc comment.
+* Documentation property to JSDoc comment.
 * Annotation Type is converted to Typescript attribute class which extends System.Attribute and postfix of class is Attribute.
   (cf. class testAttribute:System.Attribute)
 
@@ -38,7 +38,7 @@ Belows are the rules to convert from UML model elements to Java source codes.
 * `isStatic` property to `static` modifier.
 * `isLeaf` property to `sealed` modifier.
 * `defaultValue` property to initial value.
-* Documentation property to TypescriptDoc comment.
+* Documentation property to JSDoc comment.
 
 ### UMLOperation
 
@@ -52,13 +52,13 @@ Belows are the rules to convert from UML model elements to Java source codes.
 * _UMLParameter_'s type property to type of parameter.
 * _UMLParameter_ with `direction` = `return` to return type of method. When no return parameter, `void` is used.
 * _UMLParameter_ with `isReadOnly` = `true` to `sealed` modifier of parameter.
-* Documentation property to TypescriptDoc comment.
+* Documentation property to JSDoc comment.
 
 ### UMLInterface
 
 * converted to _Typescript Interface_.  (as a separate `.ts` file)
 * `visibility` property to one of modifiers `public`, `protected`, `private` and none.
-* Documentation property to TypescriptDoc comment.
+* Documentation property to JSDoc comment.
 
 ### UMLEnumeration
 

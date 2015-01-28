@@ -65,7 +65,7 @@ define(function (require, exports, module) {
 		var result = new $.Deferred();
 
 		// If options is not passed, get from preference
-		options = options || CsharpPreferences.getGenOptions();
+		options = options || TypescriptPreferences.getGenOptions();
 
 		// If base is not assigned, popup ElementPicker
 		if (!base) {
@@ -80,7 +80,7 @@ define(function (require, exports, module) {
 								if (!err) {
 									if (files.length > 0) {
 										path = files[0];
-										CsharpCodeGenerator.generate(base, path, options).then(result.resolve, result.reject);
+										TypescriptCodeGenerator.generate(base, path, options).then(result.resolve, result.reject);
 									} else {
 										result.reject(FileSystem.USER_CANCELED);
 									}
@@ -89,7 +89,7 @@ define(function (require, exports, module) {
 								}
 							});
 						} else {
-							CsharpCodeGenerator.generate(base, path, options).then(result.resolve, result.reject);
+							TypescriptCodeGenerator.generate(base, path, options).then(result.resolve, result.reject);
 						}
 					} else {
 						result.reject();
@@ -102,7 +102,7 @@ define(function (require, exports, module) {
 					if (!err) {
 						if (files.length > 0) {
 							path = files[0];
-							CsharpCodeGenerator.generate(base, path, options).then(result.resolve, result.reject);
+							TypescriptCodeGenerator.generate(base, path, options).then(result.resolve, result.reject);
 						} else {
 							result.reject(FileSystem.USER_CANCELED);
 						}
@@ -111,7 +111,7 @@ define(function (require, exports, module) {
 					}
 				});
 			} else {
-				CsharpCodeGenerator.generate(base, path, options).then(result.resolve, result.reject);
+				TypescriptCodeGenerator.generate(base, path, options).then(result.resolve, result.reject);
 			}
 		}
 		return result.promise();
@@ -129,7 +129,7 @@ define(function (require, exports, module) {
 		var result = new $.Deferred();
 
 		// If options is not passed, get from preference
-		options = CsharpPreferences.getRevOptions();
+		options = TypescriptPreferences.getRevOptions();
 
 		// If basePath is not assigned, popup Open Dialog to select a folder
 		if (!basePath) {
@@ -137,7 +137,7 @@ define(function (require, exports, module) {
 				if (!err) {
 					if (files.length > 0) {
 						basePath = files[0];
-						CsharpReverseEngineer.analyze(basePath, options).then(result.resolve, result.reject);
+						TypescriptReverseEngineer.analyze(basePath, options).then(result.resolve, result.reject);
 					} else {
 						result.reject(FileSystem.USER_CANCELED);
 					}
@@ -150,7 +150,7 @@ define(function (require, exports, module) {
 	}
 
 	function _handleConfigure() {
-		CommandManager.execute(Commands.FILE_PREFERENCES, CsharpPreferences.getId());
+		CommandManager.execute(Commands.FILE_PREFERENCES, TypescriptPreferences.getId());
 	}
 
 	// Register Commands
